@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/aquasecurity/k8s-node-collector/pkg/collector"
+	"github.com/khulnasoft-lab/k8s-node-collector/pkg/collector"
 	"github.com/spf13/cobra"
 )
 

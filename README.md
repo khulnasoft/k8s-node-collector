@@ -1,7 +1,7 @@
 [![GitHub Release][release-img]][release]
 [![Build Action][action-build-img]][action-build]
 [![Release snapshot Action][action-release-snapshot-img]][action-release-snapshot]
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/k8s-node-collector/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/khulnasoft-lab/k8s-node-collector/blob/main/LICENSE)
 
 # k8s-node-collector
 
@@ -320,9 +320,9 @@ kubectl logs node-collector-ng2z7
 kubectl delete -f job.yaml
 ```
 
-[release-img]: https://img.shields.io/github/release/aquasecurity/k8s-node-collector.svg?logo=github
-[release]: https://github.com/aquasecurity/k8s-node-collector/releases
-[action-build-img]: https://github.com/aquasecurity/k8s-node-collector/actions/workflows/build.yaml/badge.svg
-[action-build]: https://github.com/aquasecurity/k8s-node-collector/actions/workflows/build.yaml
-[action-release-snapshot-img]: https://github.com/aquasecurity/k8s-node-collector/actions/workflows/release-snapshot.yaml/badge.svg
-[action-release-snapshot]: https://github.com/aquasecurity/k8s-node-collector/actions/workflows/release-snapshot.yaml
+[release-img]: https://img.shields.io/github/release/khulnasoft-lab/k8s-node-collector.svg?logo=github
+[release]: https://github.com/khulnasoft-lab/k8s-node-collector/releases
+[action-build-img]: https://github.com/khulnasoft-lab/k8s-node-collector/actions/workflows/build.yaml/badge.svg
+[action-build]: https://github.com/khulnasoft-lab/k8s-node-collector/actions/workflows/build.yaml
+[action-release-snapshot-img]: https://github.com/khulnasoft-lab/k8s-node-collector/actions/workflows/release-snapshot.yaml/badge.svg
+[action-release-snapshot]: https://github.com/khulnasoft-lab/k8s-node-collector/actions/workflows/release-snapshot.yaml

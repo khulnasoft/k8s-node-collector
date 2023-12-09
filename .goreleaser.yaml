@@ -42,7 +42,7 @@ changelog:
       - '^release'
 dockers:
   - image_templates:
-      - "ghcr.io/aquasecurity/node-collector:{{ .Version }}-amd64"
+      - "ghcr.io/khulnasoft-lab/node-collector:{{ .Version }}-amd64"
     use: buildx
     goos: linux
     dockerfile: build/node-collector/Dockerfile
@@ -52,15 +52,15 @@ dockers:
     build_flag_templates:
       - "--label=org.opencontainers.image.title=node-collector"
       - "--label=org.opencontainers.image.description=collect node info"
-      - "--label=org.opencontainers.image.vendor=Aqua Security"
+      - "--label=org.opencontainers.image.vendor=Khulnasoft Security"
       - "--label=org.opencontainers.image.version={{ .Version }}"
       - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.source=https://github.com/aquasecurity/node-collector"
+      - "--label=org.opencontainers.image.source=https://github.com/khulnasoft-lab/node-collector"
       - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-      - "--label=org.opencontainers.image.documentation=https://aquasecurity.github.io/node-collector/v{{ .Version }}/"
+      - "--label=org.opencontainers.image.documentation=https://khulnasoft-lab.github.io/node-collector/v{{ .Version }}/"
       - "--platform=linux/amd64"
   - image_templates:
-      - "ghcr.io/aquasecurity/node-collector:{{ .Version }}-arm64"
+      - "ghcr.io/khulnasoft-lab/node-collector:{{ .Version }}-arm64"
     use: buildx
     goos: linux
     dockerfile: build/node-collector/Dockerfile
@@ -70,18 +70,18 @@ dockers:
     build_flag_templates:
       - "--label=org.opencontainers.image.title=node-collector"
       - "--label=org.opencontainers.image.description=Keeps node-collector resources updated"
-      - "--label=org.opencontainers.image.vendor=Aqua Security"
+      - "--label=org.opencontainers.image.vendor=Khulnasoft Security"
       - "--label=org.opencontainers.image.version={{ .Version }}"
       - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.source=https://github.com/aquasecurity/node-collector"
+      - "--label=org.opencontainers.image.source=https://github.com/khulnasoft-lab/node-collector"
       - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-      - "--label=org.opencontainers.image.documentation=https://aquasecurity.github.io/node-collector/v{{ .Version }}/"
+      - "--label=org.opencontainers.image.documentation=https://khulnasoft-lab.github.io/node-collector/v{{ .Version }}/"
       - "--platform=linux/arm64"
 docker_manifests:
-  - name_template: "ghcr.io/aquasecurity/node-collector:{{ .Version }}"
+  - name_template: "ghcr.io/khulnasoft-lab/node-collector:{{ .Version }}"
     image_templates:
-      - "ghcr.io/aquasecurity/node-collector:{{ .Version }}-amd64"
-      - "ghcr.io/aquasecurity/node-collector:{{ .Version }}-arm64"
+      - "ghcr.io/khulnasoft-lab/node-collector:{{ .Version }}-amd64"
+      - "ghcr.io/khulnasoft-lab/node-collector:{{ .Version }}-arm64"
 signs:
   - cmd: cosign
     signature: "${artifact}.sig"

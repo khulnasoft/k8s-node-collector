@@ -1,4 +1,4 @@
-module github.com/aquasecurity/k8s-node-collector
+module github.com/khulnasoft-lab/k8s-node-collector
 
 go 1.19
 
