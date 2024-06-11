@@ -17,6 +17,17 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+const (
+	native   = "k8s"
+	gke      = "gke"
+	aks      = "aks"
+	eks      = "eks"
+	rke2     = "rke2"
+	k3s      = "k3s"
+	ocp      = "ocp"
+	microk8s = "microk8s"
+)
+
 type Cluster struct {
 	clientSet     *kubernetes.Clientset
 	cConfig       clientcmd.ClientConfig
@@ -37,19 +48,22 @@ func GetCluster() (*Cluster, error) {
 	cf := genericclioptions.NewConfigFlags(true)
 	rest.SetDefaultWarningHandler(rest.NoWarnings{})
 	clientConfig := cf.ToRawKubeConfigLoader()
-	rc, err := clientConfig.ClientConfig()
-	if err != nil {
-		return nil, err
-	}
 	restMapper, err := cf.ToRESTMapper()
 	if err != nil {
 		return nil, err
 	}
-	clientset, err := kubernetes.NewForConfig(rc)
+	// creates the in-cluster config
+	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
-	k8sDynamicClient, err := dynamic.NewForConfig(rc)
+	// creates the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	k8sDynamicClient, err := dynamic.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
@@ -61,11 +75,30 @@ func (cluster *Cluster) Platfrom() (Platform, error) {
 	if len(v) != 0 {
 		return Platform{Name: "ocp", Version: majorVersion(v)}, nil
 	}
-	version, err := cluster.clientSet.ServerVersion()
+	nodeName := cluster.getNodeName()
+	semVersion, err := cluster.clientSet.ServerVersion()
 	if err != nil {
 		return Platform{}, err
 	}
-	return getPlatformInfoFromVersion(version.GitVersion), nil
+	p := getPlatformInfoFromVersion(semVersion.GitVersion)
+	var name string
+	switch {
+	case strings.Contains(p.Version, k3s):
+		name = k3s
+	case strings.Contains(p.Version, rke2):
+		name = rke2
+	case strings.Contains(p.Version, microk8s):
+		name = microk8s
+	case strings.Contains(nodeName, aks):
+		name = aks
+	case strings.Contains(nodeName, eks):
+		name = eks
+	case strings.Contains(nodeName, gke):
+		name = gke
+	default:
+		name = "k8s"
+	}
+	return Platform{Name: name, Version: p.Version}, nil
 }
 
 func getPlatformInfoFromVersion(s string) Platform {
@@ -99,6 +132,13 @@ func (cluster *Cluster) getOpenShiftVersion(ctx context.Context) string {
 
 	}
 	return version
+}
+func (cluster *Cluster) getNodeName() string {
+	nodes, err := cluster.clientSet.CoreV1().Nodes().List(context.Background(), v1.ListOptions{})
+	if err != nil {
+		return "k8s"
+	}
+	return nodes.Items[0].Name
 }
 
 func (cluster *Cluster) getDynamicClient(gvr schema.GroupVersionResource) dynamic.ResourceInterface {
