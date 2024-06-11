@@ -22,13 +22,6 @@ archives:
   - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     builds:
       - node-collector
-    replacements:
-      amd64: x86_64
-      arm: ARM
-      arm64: ARM64
-    format_overrides:
-      - goos: windows
-        format: zip
 checksum:
   name_template: "checksums.txt"
 snapshot:
@@ -59,49 +52,7 @@ dockers:
       - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
       - "--label=org.opencontainers.image.documentation=https://khulnasoft.github.io/node-collector/v{{ .Version }}/"
       - "--platform=linux/amd64"
-  - image_templates:
-      - "ghcr.io/khulnasoft/node-collector:{{ .Version }}-arm64"
-    use: buildx
-    goos: linux
-    dockerfile: build/node-collector/Dockerfile
-    goarch: arm64
-    ids:
-      - node-collector
-    build_flag_templates:
-      - "--label=org.opencontainers.image.title=node-collector"
-      - "--label=org.opencontainers.image.description=Keeps node-collector resources updated"
-      - "--label=org.opencontainers.image.vendor=Khulnasoft Security"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-      - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.source=https://github.com/khulnasoft/node-collector"
-      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-      - "--label=org.opencontainers.image.documentation=https://khulnasoft.github.io/node-collector/v{{ .Version }}/"
-      - "--platform=linux/arm64"
 docker_manifests:
   - name_template: "ghcr.io/khulnasoft/node-collector:{{ .Version }}"
     image_templates:
       - "ghcr.io/khulnasoft/node-collector:{{ .Version }}-amd64"
-      - "ghcr.io/khulnasoft/node-collector:{{ .Version }}-arm64"
-signs:
-  - cmd: cosign
-    signature: "${artifact}.sig"
-    certificate: "${artifact}.pem"
-    args:
-      - "sign-blob"
-      - "--yes"
-      - "--oidc-issuer=https://token.actions.githubusercontent.com"
-      - "--output-certificate=${certificate}"
-      - "--output-signature=${signature}"
-      - "${artifact}"
-    artifacts: all
-    output: true
-
-docker_signs:
-  - cmd: cosign
-    args:
-      - "sign"
-      - "--yes"
-      - "--oidc-issuer=https://token.actions.githubusercontent.com"
-      - "${artifact}"
-    artifacts: all
-    output: true

@@ -1,68 +1,70 @@
 package collector
 
 import (
-	"embed"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
 
 const (
-	configFolder = "config"
 	// Version resource version
 	Version = "v1"
 	// Kind resource kind
 	Kind = "NodeInfo"
 )
 
-//go:embed config
-var config embed.FS
-
-// LoadConfig load audit commands specification from config file
-func LoadConfig(target string) (map[string]*SpecInfo, error) {
-	fullPath := fmt.Sprintf("%s/%s", configFolder, target)
-	dirEntries, err := config.ReadDir(fullPath)
+// LoadConfigParams load audit params data
+func LoadConfigParams(nodeFileconfig string) (*Config, error) {
+	var decodedNodeFileconfig []byte
+	if nodeFileconfig == "" {
+		return nil, fmt.Errorf("node file config is empty")
+	}
+	decodedNodeFileconfig, err := uncompressAndDecode(nodeFileconfig)
+	if err != nil {
+		fmt.Println("failed to read node file config")
+		return nil, err
+	}
+	var np Config
+	err = yaml.Unmarshal(decodedNodeFileconfig, &np)
 	if err != nil {
 		return nil, err
 	}
-	specInfoMap := make(map[string]*SpecInfo)
-	for _, entry := range dirEntries {
-		fContent, err := config.ReadFile(fmt.Sprintf("%s/%s", fullPath, entry.Name()))
-		if err != nil {
-			return nil, err
-		}
-		si, err := getSpecInfo(string(fContent))
-		if err != nil {
-			return nil, err
-		}
-		specInfoMap[si.Name] = si
+	return &np, nil
+}
+
+func LoadKubeletMapping(kubletConfigMapping string) (map[string]string, error) {
+	var fContent []byte
+	var err error
+	if kubletConfigMapping == "" {
+		return nil, fmt.Errorf("kubletConfigMapping is empty")
 	}
-	return specInfoMap, nil
+	fContent, err = uncompressAndDecode(kubletConfigMapping)
+	if err != nil {
+		fmt.Println("failed to read nodekubletConfigMapping")
+		return nil, err
+	}
+	mapping := make(map[string]string)
+	err = yaml.Unmarshal(fContent, &mapping)
+	if err != nil {
+		return nil, err
+	}
+	return mapping, nil
 }
 
 // SpecInfo spec info with require comand to collect
 type SpecInfo struct {
-	Version    string      `yaml:"version"`
-	Name       string      `yaml:"name"`
-	Title      string      `yaml:"title"`
-	Collectors []Collector `yaml:"collectors"`
+	Version  string    `yaml:"version"`
+	Name     string    `yaml:"name"`
+	Title    string    `yaml:"title"`
+	Commands []Command `yaml:"commands"`
 }
 
 // Collector details of info to collect
-type Collector struct {
+type Command struct {
 	Key      string `yaml:"key"`
 	Title    string `yaml:"title"`
 	Audit    string `yaml:"audit"`
 	NodeType string `yaml:"nodeType"`
-}
-
-func getSpecInfo(info string) (*SpecInfo, error) {
-	var specInfo SpecInfo
-	err := yaml.Unmarshal([]byte(info), &specInfo)
-	if err != nil {
-		return nil, err
-	}
-	return &specInfo, nil
 }
 
 // Node output node data with info results
@@ -77,4 +79,43 @@ type Node struct {
 // Info comand output result
 type Info struct {
 	Values interface{} `json:"values"`
+}
+
+type Config struct {
+	Node NodeParams `yaml:"node"`
+}
+type Mapper struct {
+	VersionMapping map[string][]SpecVersion `yaml:"version_mapping"`
+}
+type SpecVersion struct {
+	Name           string
+	Version        string `yaml:"cluster_version"`
+	Op             string `yaml:"op"`
+	CisSpecName    string `yaml:"spec_name"`
+	CisSpecVersion string `yaml:"spec_version"`
+}
+type NodeParams struct {
+	APIserver         Params            `yaml:"apiserver"`
+	ControllerManager Params            `yaml:"controllermanager"`
+	Scheduler         Params            `yaml:"scheduler"`
+	Etcd              Params            `yaml:"etcd"`
+	Proxy             Params            `yaml:"proxy"`
+	KubeLet           Params            `yaml:"kubelet"`
+	Flanneld          Params            `yaml:"flanneld"`
+	VersionMapping    map[string]string `yaml:"version_mapping"`
+}
+
+type Params struct {
+	Config            []string `yaml:"confs,omitempty"`
+	DefaultConfig     string   `yaml:"defaultconf,omitempty"`
+	KubeConfig        []string `yaml:"kubeconfig,omitempty"`
+	DefaultKubeConfig string   `yaml:"defaultkubeconfig,omitempty"`
+	DataDirs          []string `yaml:"datadirs,omitempty"`
+	DefaultDataDir    string   `yaml:"defaultdatadir,omitempty"`
+	Binaries          []string `yaml:"bins,omitempty"`
+	DefaultBinaries   string   `yaml:"defaultbins,omitempty"`
+	Services          []string `yaml:"svc,omitempty"`
+	DefalutServices   string   `yaml:"defaultsvc,omitempty"`
+	CAFile            []string `yaml:"cafile,omitempty"`
+	DefaultCAFile     string   `yaml:"defaultcafile,omitempty"`
 }
